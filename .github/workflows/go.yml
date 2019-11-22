@@ -20,4 +20,4 @@ jobs:
       run: make promu
 
     - name: Build
-      run: make
+      run: make build
