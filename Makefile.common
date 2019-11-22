@@ -90,7 +90,7 @@ common-vet:
 .PHONY: common-staticcheck
 common-staticcheck: $(STATICCHECK)
 	@echo ">> running staticcheck"
-	$(STATICCHECK) -ignore "$(STATICCHECK_IGNORE)" $(pkgs)
+	$(STATICCHECK) $(pkgs)
 
 .PHONY: common-unused
 common-unused: $(GOVENDOR)
