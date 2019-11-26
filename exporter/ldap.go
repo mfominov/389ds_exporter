@@ -128,9 +128,9 @@ func objectClass(name string) string {
 	return fmt.Sprintf("(objectClass=%v)", name)
 }
 
-func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ldapCert, ipaDomain string) {
+func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain string) {
 	start := time.Now()
-	if err := scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ipaDomain); err != nil {
+	if err := scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain); err != nil {
 		scrapeCounter.WithLabelValues("fail").Inc()
 		log.Error("Scrape failed, error is:", err)
 	} else {
@@ -141,12 +141,12 @@ func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ldapCert, ipaDomain string) {
 	log.Infof("Scrape completed in %f seconds", elapsed)
 }
 
-func dial(ldapAddr, ldapCert string) (*ldap.Conn, error) {
+func dial(ldapAddr, ldapCert, ldapCertServerName string) (*ldap.Conn, error) {
+	l, err := ldap.Dial("tcp", ldapAddr)
+	if err != nil {
+		return nil, err
+	}
 	if ldapCert == "" {
-		l, err := ldap.Dial("tcp", ldapAddr)
-		if err != nil {
-			return nil, err
-		}
 		return l, nil
 	}
 	roots := x509.NewCertPool()
@@ -158,16 +158,21 @@ func dial(ldapAddr, ldapCert string) (*ldap.Conn, error) {
 	if !ok {
 		panic("failed to parse root cert")
 	}
-	l, err := ldap.DialTLS("tcp", ldapAddr, &tls.Config{RootCAs: roots})
+	err = l.StartTLS(&tls.Config{RootCAs: roots, ServerName: ldapCertServerName})
 	if err != nil {
 		return nil, err
+		l.Close()
 	}
 	return l, nil
 }
 
-func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ipaDomain string) error {
+func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain string) error {
 	suffix := "dc=" + strings.Replace(ipaDomain, ".", ",dc=", -1)
-	l, err := dial(ldapAddr, ldapCert)
+	l, err := dial(ldapAddr, ldapCert, ldapCertServerName)
+	if err != nil {
+		return err
+	}
+	defer l.Close()
 
 	err = l.Bind(ldapUser, ldapPass)
 	if err != nil {

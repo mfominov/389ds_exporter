@@ -7,6 +7,7 @@ require (
 	cloud.google.com/go/bigquery v1.3.0 // indirect
 	cloud.google.com/go/pubsub v1.1.0 // indirect
 	cloud.google.com/go/storage v1.4.0 // indirect
+	dmitri.shuralyov.com/gpu/mtl v0.0.0-20191126053124-fec1b7b612ab // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/creack/pty v1.1.9 // indirect
