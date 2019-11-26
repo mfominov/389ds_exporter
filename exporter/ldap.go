@@ -1,8 +1,11 @@
 package exporter
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -125,9 +128,9 @@ func objectClass(name string) string {
 	return fmt.Sprintf("(objectClass=%v)", name)
 }
 
-func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain string) {
+func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain string) {
 	start := time.Now()
-	if err := scrapeAll(ldapAddr, ldapUser, ldapPass, ipaDomain); err != nil {
+	if err := scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain); err != nil {
 		scrapeCounter.WithLabelValues("fail").Inc()
 		log.Error("Scrape failed, error is:", err)
 	} else {
@@ -138,10 +141,34 @@ func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain string) {
 	log.Infof("Scrape completed in %f seconds", elapsed)
 }
 
-func scrapeAll(ldapAddr, ldapUser, ldapPass, ipaDomain string) error {
-	suffix := "dc=" + strings.Replace(ipaDomain, ".", ",dc=", -1)
-
+func dial(ldapAddr, ldapCert, ldapCertServerName string) (*ldap.Conn, error) {
 	l, err := ldap.Dial("tcp", ldapAddr)
+	if err != nil {
+		return nil, err
+	}
+	if ldapCert == "" {
+		return l, nil
+	}
+	roots := x509.NewCertPool()
+	b, err := ioutil.ReadFile(ldapCert)
+	if err != nil {
+		return nil, err
+	}
+	ok := roots.AppendCertsFromPEM(b)
+	if !ok {
+		panic("failed to parse root cert")
+	}
+	err = l.StartTLS(&tls.Config{RootCAs: roots, ServerName: ldapCertServerName})
+	if err != nil {
+		return nil, err
+		l.Close()
+	}
+	return l, nil
+}
+
+func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain string) error {
+	suffix := "dc=" + strings.Replace(ipaDomain, ".", ",dc=", -1)
+	l, err := dial(ldapAddr, ldapCert, ldapCertServerName)
 	if err != nil {
 		return err
 	}
