@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/version"
 	log "github.com/sirupsen/logrus"
-        "github.com/terrycain/389ds_exporter/exporter"
+	"github.com/terrycain/389ds_exporter/exporter"
 )
 
 var (
@@ -17,6 +17,7 @@ var (
 	ldapAddr    = flag.String("ldap.addr", "localhost:389", "Address of 389ds server")
 	ldapUser    = flag.String("ldap.user", "cn=Directory Manager", "389ds Directory Manager user")
 	ldapPass    = flag.String("ldap.pass", "", "389ds Directory Manager password")
+	ldapCert    = flag.String("ldap.cert", "", "Certificate for  LDAP with startTLS")
 	ipaDomain   = flag.String("ipa-domain", "", "FreeIPA domain e.g. example.org")
 	interval    = flag.Duration("interval", 60*time.Second, "Scrape interval")
 	debug       = flag.Bool("debug", false, "Debug logging")
@@ -46,7 +47,7 @@ func main() {
 	log.Info("Starting 389ds scraper for ", *ldapAddr)
 	for range time.Tick(*interval) {
 		log.Debug("Starting metrics scrape")
-		exporter.ScrapeMetrics(*ldapAddr, *ldapUser, *ldapPass, *ipaDomain)
+		exporter.ScrapeMetrics(*ldapAddr, *ldapUser, *ldapPass, *ipaDomain, *ldapCert)
 	}
 }
 
