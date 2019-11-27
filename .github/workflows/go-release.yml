@@ -21,13 +21,11 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
       
-    - name: Install Promu
-      run: make promu
-
     - name: Build
       run: |
-        make build
+        make
         zip 389ds_exporter 389ds_exporter
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1.0.0
