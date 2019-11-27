@@ -3,7 +3,6 @@ package exporter
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strconv"
@@ -122,10 +121,6 @@ func init() {
 		scrapeCounter,
 		scrapeDurationGauge,
 	)
-}
-
-func objectClass(name string) string {
-	return fmt.Sprintf("(objectClass=%v)", name)
 }
 
 func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain string) {
@@ -281,7 +276,7 @@ func ldapSubordinatesQuery(l *ldap.Conn, baseDN, searchFilter string) (float64, 
 	}
 
 	if len(sr.Entries) == 0 {
-		return -1, errors.New(fmt.Sprintf("No entries contain numSubordinates for %s (%s)", baseDN, searchFilter))
+		return -1, fmt.Errorf("no entries contain numSubordinates for %s (%s)", baseDN, searchFilter)
 	}
 
 	val := sr.Entries[0].GetAttributeValue("numSubordinates")
