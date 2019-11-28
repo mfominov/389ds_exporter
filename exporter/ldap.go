@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
-	"strconv"
 	"strings"
 	"time"
 
@@ -177,7 +176,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDo
 	var errs error
 	// Search for standard accounts
 	log.Debug("getting active accounts")
-	num, err := ldapSubordinatesQuery(l, fmt.Sprintf("cn=users,cn=accounts,%s", suffix), "(objectClass=*)")
+	num, err := ldapCountQuery(l, fmt.Sprintf("cn=users,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
@@ -185,7 +184,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDo
 
 	// Search for staged accounts
 	log.Debug("getting staged accounts")
-	num, err = ldapSubordinatesQuery(l, fmt.Sprintf("cn=staged users,cn=accounts,cn=provisioning,%s", suffix), "(objectClass=*)")
+	num, err = ldapCountQuery(l, fmt.Sprintf("cn=staged users,cn=accounts,cn=provisioning,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
@@ -193,7 +192,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDo
 
 	// Search for deleted accounts
 	log.Debug("getting preserved accounts")
-	num, err = ldapSubordinatesQuery(l, fmt.Sprintf("cn=deleted users,cn=accounts,cn=provisioning,%s", suffix), "(objectClass=*)")
+	num, err = ldapCountQuery(l, fmt.Sprintf("cn=deleted users,cn=accounts,cn=provisioning,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
@@ -201,7 +200,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDo
 
 	// Search for groups
 	log.Debug("getting groups")
-	num, err = ldapSubordinatesQuery(l, fmt.Sprintf("cn=groups,cn=accounts,%s", suffix), "(objectClass=*)")
+	num, err = ldapCountQuery(l, fmt.Sprintf("cn=groups,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
@@ -209,7 +208,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDo
 
 	// Search for hosts
 	log.Debug("getting hosts")
-	num, err = ldapSubordinatesQuery(l, fmt.Sprintf("cn=computers,cn=accounts,%s", suffix), "(objectClass=*)")
+	num, err = ldapCountQuery(l, fmt.Sprintf("cn=computers,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
@@ -217,7 +216,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDo
 
 	// Search for hostgroups
 	log.Debug("getting hostgroups")
-	num, err = ldapSubordinatesQuery(l, fmt.Sprintf("cn=hostgroups,cn=accounts,%s", suffix), "(objectClass=*)")
+	num, err = ldapCountQuery(l, fmt.Sprintf("cn=hostgroups,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
@@ -225,7 +224,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDo
 
 	// Search for sudo rules
 	log.Debug("getting sudo rules")
-	num, err = ldapSubordinatesQuery(l, fmt.Sprintf("cn=sudorules,cn=sudo,%s", suffix), "(objectClass=*)")
+	num, err = ldapCountQuery(l, fmt.Sprintf("cn=sudorules,cn=sudo,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
@@ -263,29 +262,6 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDo
 	}
 
 	return errs
-}
-
-func ldapSubordinatesQuery(l *ldap.Conn, baseDN, searchFilter string) (float64, error) {
-	req := ldap.NewSearchRequest(
-		baseDN, ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
-		searchFilter, []string{"numSubordinates"}, nil,
-	)
-	sr, err := l.Search(req)
-	if err != nil {
-		return -1, err
-	}
-
-	if len(sr.Entries) == 0 {
-		return -1, fmt.Errorf("no entries contain numSubordinates for %s (%s)", baseDN, searchFilter)
-	}
-
-	val := sr.Entries[0].GetAttributeValue("numSubordinates")
-	num, err := strconv.ParseFloat(val, 64)
-	if err != nil {
-		return -1, err
-	}
-
-	return num, nil
 }
 
 func ldapCountQuery(l *ldap.Conn, baseDN, searchFilter, attr string, scope int) (float64, error) {
