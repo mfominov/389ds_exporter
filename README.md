@@ -33,17 +33,17 @@ Usage of ./389ds_exporter:
 | CLI flag                  | Environment variable     | Description                                                           |
 |---------------------------|--------------------------|-----------------------------------------------------------------------|
 | `--config`                | `389DS_CONFIG`            | YAML format config file with the extension (i.e. /path/to/config.yaml) |
-| `--debug`                 | `389DS_DEBUG`                       | Debug logging                                                         |
 | `--interval`              | `389DS_INTERVAL`                    | Scrape interval (default 60s)                                         |
-| `--ipa-dns`               | `389DS_IPA_DNS`                     | Should we scrape DNS stats? (default true)              |
-| `--ipa-domain`            | `389DS_IPA_DOMAIN`                  | FreeIPA domain e.g. example.org                                       |
+| `--ipa.dns`               | `389DS_IPA_DNS`                     | Should we scrape DNS stats? (default true)              |
+| `--ipa.domain`            | `389DS_IPA_DOMAIN`                  | FreeIPA domain e.g. example.org                                       |
 | `--ldap.addr`             | `389DS_LDAP_ADDR`                   | URI of 389ds server (default "ldap://localhost:389")                  |
 | `--ldap.cert`             | `389DS_LDAP_CERT`                   | Certificate for LDAP with startTLS or TLS                             |
 | `--ldap.cert-server-name` | `389DS_CERT_SERVER_NAME`            | ServerName for LDAP with startTLS or TLS                              |
 | `--ldap.enablestarttls`   | `389DS_ENABLESTARTTLS`              | Use StartTLS for ldap:// connections                                  |
 | `--ldap.pass`             | `389DS_LDAP_PASS`                   | 389ds Directory Manager password                                      |
 | `--ldap.user`             | `389DS_LDAP_USER`                   | 389ds Directory Manager user (default "cn=Directory Manager")         |
-| `--log-json`              | `389DS_LOG_JSON`                    | JSON formatted log messages                                           |
+| `--log.format`              | `389DS_LOG_FORMAT`                    | Log format (default or json) messages                                           |
+| `--log.level`                 | `389DS_LOG_LEVEL`                       | Log level logging                                                         |
 | `--web.listen-address`    | `389DS_WEB_LISTEN_ADDRESS`          | Bind address for prometheus HTTP metrics server (default ":9496")     |
 | `--web.telemetry-path`    | `389DS_WEB_TELEMETRY_PATH`          | Path to expose metrics on (default "/metrics")                        |
 

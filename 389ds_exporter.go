@@ -20,17 +20,18 @@ import (
 func main() {
 	flag.String("web.listen-address", ":9496", "Bind address for prometheus HTTP metrics server")
 	flag.String("web.telemetry-path", "/metrics", "Path to expose metrics on")
-	flag.Bool("ipa-dns", true, "Should we scrape DNS stats?")
+	flag.Bool("ipa.dns", true, "Should we scrape DNS stats?")
 	flag.String("ldap.addr", "ldap://localhost:389", "URI of 389ds server")
 	flag.String("ldap.user", "cn=Directory Manager", "389ds Directory Manager user")
 	flag.String("ldap.pass", "", "389ds Directory Manager password")
 	flag.String("ldap.cert", "", "Certificate for  LDAP with startTLS")
 	flag.String("ldap.cert-server-name", "", "ServerName for LDAP with startTLS")
-	flag.String("ipa-domain", "", "FreeIPA domain e.g. example.org")
+	flag.String("ipa.domain", "", "FreeIPA domain e.g. example.org")
 	flag.Duration("interval", 60*time.Second, "Scrape interval")
 	flag.Bool("ldap.enablestarttls", false, "Use StartTLS")
 	flag.Bool("debug", false, "Debug logging")
-	flag.Bool("log-json", false, "JSON formatted log messages")
+	flag.String("log.level", "info", "Log level")
+	flag.String("log.format", "default", "Log format (default, json)")
 	flag.String("config", "", "YAML format config file with the extension (i.e. /path/to/config.yaml)")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
@@ -56,18 +57,26 @@ func main() {
 	ldapPass := viper.GetString("ldap.pass")
 	ldapCert := viper.GetString("ldap.cert")
 	ldapCertServerName := viper.GetString("ldap.cert-server-name")
-	ipaDomain := viper.GetString("ipa-domain")
+	ipaDomain := viper.GetString("ipa.domain")
 	interval := viper.GetDuration("interval")
 	enableStartTLS := viper.GetBool("ldap.enablestarttls")
-	ipaDns := viper.GetBool("ipa-dns")
-	debug := viper.GetBool("debug")
-	jsonFormat := viper.GetBool("log-json")
+	ipaDns := viper.GetBool("ipa.dns")
+	logLevel := viper.GetString("log.level")
+	logFormat := viper.GetString("log.format")
 
-	if debug {
-		log.SetLevel(log.DebugLevel)
+	if level, err := log.ParseLevel(logLevel); err != nil {
+		log.Fatalf("log.level must be one of %v", log.AllLevels)
+	} else {
+		log.SetLevel(level)
 	}
-	if jsonFormat {
+
+	switch logFormat {
+	case "default":
+		log.SetFormatter(&log.TextFormatter{})
+	case "json":
 		log.SetFormatter(&log.JSONFormatter{})
+	default:
+		log.Fatal("log.level must be one of [default json]")
 	}
 
 	if ldapPass == "" {
@@ -113,15 +122,15 @@ func StartMetricsServer(bindAddr, metricsPath string) {
 	d.Handle(metricsPath, promhttp.Handler())
 	d.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
-             <head><title>389ds Exporter</title></head>
-             <body>
-             <h1>389ds Exporter</h1>
-             <p><a href='` + metricsPath + `'>Metrics</a></p>
-             </dl>
-             <h2>Build</h2>
-             <pre>` + version.Info() + ` ` + version.BuildContext() + `</pre>
-             </body>
-             </html>`))
+<head><title>389ds Exporter</title></head>
+						 <body>
+						 <h1>389ds Exporter</h1>
+						 <p><a href='` + metricsPath + `'>Metrics</a></p>
+						 </dl>
+						 <h2>Build</h2>
+						 <pre>` + version.Info() + ` ` + version.BuildContext() + `</pre>
+						 </body>
+						 </html>`))
 	})
 
 	err := http.ListenAndServe(bindAddr, d)
