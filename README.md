@@ -7,7 +7,6 @@ To run:
 go build
 ./389ds_exporter [flags]
 ```
-
 ## Exported Metrics
 
 | Metric | Meaning | Labels |
@@ -33,9 +32,10 @@ Usage of ./389ds_exporter:
 
 | CLI flag                  | Environment variable     | Description                                                           |
 |---------------------------|--------------------------|-----------------------------------------------------------------------|
-| `-config`                 | `389DS_CONFIG`            | YAML format config file with the extension (i.e. /path/to/config.yaml) |
+| `--config`                | `389DS_CONFIG`            | YAML format config file with the extension (i.e. /path/to/config.yaml) |
 | `--debug`                 | `389DS_DEBUG`                       | Debug logging                                                         |
 | `--interval`              | `389DS_INTERVAL`                    | Scrape interval (default 60s)                                         |
+| `--ipa-dns`               | `389DS_IPA_DNS`                     | Should we scrape DNS stats? (default true)              |
 | `--ipa-domain`            | `389DS_IPA_DOMAIN`                  | FreeIPA domain e.g. example.org                                       |
 | `--ldap.addr`             | `389DS_LDAP_ADDR`                   | URI of 389ds server (default "ldap://localhost:389")                  |
 | `--ldap.cert`             | `389DS_LDAP_CERT`                   | Certificate for LDAP with startTLS or TLS                             |

@@ -20,6 +20,7 @@ import (
 func main() {
 	flag.String("web.listen-address", ":9496", "Bind address for prometheus HTTP metrics server")
 	flag.String("web.telemetry-path", "/metrics", "Path to expose metrics on")
+	flag.Bool("ipa-dns", true, "Should we scrape DNS stats?")
 	flag.String("ldap.addr", "ldap://localhost:389", "URI of 389ds server")
 	flag.String("ldap.user", "cn=Directory Manager", "389ds Directory Manager user")
 	flag.String("ldap.pass", "", "389ds Directory Manager password")
@@ -58,6 +59,7 @@ func main() {
 	ipaDomain := viper.GetString("ipa-domain")
 	interval := viper.GetDuration("interval")
 	enableStartTLS := viper.GetBool("ldap.enablestarttls")
+	ipaDns := viper.GetBool("ipa-dns")
 	debug := viper.GetBool("debug")
 	jsonFormat := viper.GetBool("log-json")
 
@@ -99,10 +101,10 @@ func main() {
 
 	log.Info("Starting 389ds scraper for ", ldapAddr)
 	log.Debug("Starting metrics scrape")
-	exporter.ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain, tlsConf, enableStartTLS)
+	exporter.ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain, tlsConf, enableStartTLS, ipaDns)
 	for range time.Tick(interval) {
 		log.Debug("Starting metrics scrape")
-		exporter.ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain, tlsConf, enableStartTLS)
+		exporter.ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain, tlsConf, enableStartTLS, ipaDns)
 	}
 }
 

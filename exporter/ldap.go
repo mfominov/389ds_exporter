@@ -121,9 +121,9 @@ func init() {
 	)
 }
 
-func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain string, tlsConf *tls.Config, enableStartTLS bool) {
+func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain string, tlsConf *tls.Config, enableStartTLS bool, ipaDns bool) {
 	start := time.Now()
-	if err := scrapeAll(ldapAddr, ldapUser, ldapPass, tlsConf, enableStartTLS, ipaDomain); err != nil {
+	if err := scrapeAll(ldapAddr, ldapUser, ldapPass, tlsConf, enableStartTLS, ipaDomain, ipaDns); err != nil {
 		scrapeCounter.WithLabelValues("fail").Inc()
 		log.Error("Scrape failed, error is:", err)
 	} else {
@@ -134,7 +134,7 @@ func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain string, tlsConf *tls.
 	log.Infof("Scrape completed in %f seconds", elapsed)
 }
 
-func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableStartTLS bool, ipaDomain string) error {
+func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableStartTLS bool, ipaDomain string, ipaDns bool) error {
 	suffix := "dc=" + strings.Replace(ipaDomain, ".", ",dc=", -1)
 	l, err := ldaputil.DialURL(ldapAddr, tlsConf, enableStartTLS)
 	if err != nil {
@@ -212,9 +212,15 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	}
 	hbacRulesGauge.WithLabelValues().Set(num)
 
-	// Search for dns zones
-	log.Trace("getting dns zones")
-	num, err = ldapCountQuery(l, fmt.Sprintf("cn=dns,%s", suffix), "(|(objectClass=idnszone)(objectClass=idnsforwardzone))", "idnsName", ldap.ScopeSingleLevel)
+	// Search for dns zones (if configured to do so)
+	if ipaDns {
+		log.Trace("getting dns zones")
+		num, err = ldapCountQuery(l, fmt.Sprintf("cn=dns,%s", suffix), "(|(objectClass=idnszone)(objectClass=idnsforwardzone))", "idnsName", ldap.ScopeSingleLevel)
+	} else {
+		log.Debug("skipping dns zones")
+		num = 0
+		err = nil
+	}
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
