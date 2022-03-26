@@ -1,18 +1,10 @@
-# 389ds / FreeIPA Exporter [![Build Status](https://travis-ci.org/terrycain/389ds_exporter.svg)][travis]
-
-[![CircleCI](https://circleci.com/gh/terrycain/389ds_exporter/tree/master.svg?style=shield)][circleci]
-
-__It listens on port 9496 by default__
+# 389ds / FreeIPA Exporter
 
 Started out as just a replication status exporter, and evolved to export more FreeIPA related objects.
 
-Is my first stab at go, it works but it could be better and I hope to improve it. The main thing is that it has a loop that
-hits LDAP and performs the queries, it doesn't query LDAP when /metrics is queried. What I want is to query LDAP when /metrics
-is hit and then cache for a period of time (incase multiple prometheus are running).
-
 To run:
 ```bash
-make
+go build
 ./389ds_exporter [flags]
 ```
 
@@ -36,22 +28,22 @@ make
 
 ```bash
 ./389ds_exporter --help
+Usage of ./389ds_exporter:
 ```
 
-* __`-debug`:__ Debug logging
-* __`-interval`:__ Scrape interval (default 1m0s)
-* __`-ipa-domain`:__ FreeIPA domain e.g. example.org
-* __`-ldap.addr`:__ Address of 389ds server (default "localhost:389")
-* __`-ldap.pass`:__ 389ds Directory Manager password
-* __`-ldap.user`:__ 389ds Directory Manager user (default "cn=Directory Manager")
-* __`-log-json`:__ JSON formatted log messages
-* __`-web.listen-address`:__ Bind address for prometheus HTTP metrics server (default ":9496")
-* __`-web.telemetry-path`:__ Path to expose metrics on (default "/metrics")
-
-### Using docker
-
-TBD
-
+* __`--config string`:__  YAML format config file with the extension (i.e. /path/to/config.yaml)
+* __`--debug`:__  Debug logging
+* __`--interval duration`:__  Scrape interval (default 60s)
+* __`--ipa-domain string`:__  FreeIPA domain e.g. example.org
+* __`--ldap.addr string`:__  URI of 389ds server (default "ldap://localhost:389")
+* __`--ldap.cert string`:__  Certificate for LDAP with startTLS or TLS
+* __`--ldap.cert-server-name string`:__  ServerName for LDAP with startTLS or TLS
+* __`--ldap.enablestarttls`:__  Use StartTLS for ldap:// connections
+* __`--ldap.pass string`:__  389ds Directory Manager password
+* __`--ldap.user string`:__  389ds Directory Manager user (default "cn=Directory Manager")
+* __`--log-json`:__  JSON formatted log messages
+* __`--web.listen-address string`:__  Bind address for prometheus HTTP metrics server (default ":9496")
+* __`--web.telemetry-path string`:__  Path to expose metrics on (default "/metrics")
 
 ### Credits
 
@@ -59,6 +51,3 @@ This repo essentially started off as a clone of the openldap_exporter modified t
 some FreeIPA DNs. The openldap_exporter was a great help in getting this started, as was
 the consul_exporter which served as a great reference on how to package a prometheus
 exporter.
-
-[circleci]: https://circleci.com/gh/terrycain/389ds_exporter
-[travis]: https://travis-ci.org/terrycain/389ds_exporter

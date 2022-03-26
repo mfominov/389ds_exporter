@@ -2,16 +2,15 @@ package exporter
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"time"
 
+	"github.com/go-ldap/ldap/v3"
 	multierror "github.com/hashicorp/go-multierror"
+	ldaputil "github.com/jessebl/389ds_exporter/ldap"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/ldap.v2"
 )
 
 var (
@@ -122,9 +121,9 @@ func init() {
 	)
 }
 
-func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain string) {
+func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ipaDomain string, tlsConf *tls.Config, enableStartTLS bool) {
 	start := time.Now()
-	if err := scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain); err != nil {
+	if err := scrapeAll(ldapAddr, ldapUser, ldapPass, tlsConf, enableStartTLS, ipaDomain); err != nil {
 		scrapeCounter.WithLabelValues("fail").Inc()
 		log.Error("Scrape failed, error is:", err)
 	} else {
@@ -135,34 +134,9 @@ func ScrapeMetrics(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, i
 	log.Infof("Scrape completed in %f seconds", elapsed)
 }
 
-func dial(ldapAddr, ldapCert, ldapCertServerName string) (*ldap.Conn, error) {
-	l, err := ldap.Dial("tcp", ldapAddr)
-	if err != nil {
-		return nil, err
-	}
-	if ldapCert == "" {
-		return l, nil
-	}
-	roots := x509.NewCertPool()
-	b, err := ioutil.ReadFile(ldapCert)
-	if err != nil {
-		return nil, err
-	}
-	ok := roots.AppendCertsFromPEM(b)
-	if !ok {
-		panic("failed to parse root cert")
-	}
-	err = l.StartTLS(&tls.Config{RootCAs: roots, ServerName: ldapCertServerName})
-	if err != nil {
-		return nil, err
-		l.Close()
-	}
-	return l, nil
-}
-
-func scrapeAll(ldapAddr, ldapUser, ldapPass, ldapCert, ldapCertServerName, ipaDomain string) error {
+func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableStartTLS bool, ipaDomain string) error {
 	suffix := "dc=" + strings.Replace(ipaDomain, ".", ",dc=", -1)
-	l, err := dial(ldapAddr, ldapCert, ldapCertServerName)
+	l, err := ldaputil.DialURL(ldapAddr, tlsConf, enableStartTLS)
 	if err != nil {
 		return err
 	}
