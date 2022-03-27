@@ -31,19 +31,22 @@ go build
 Usage of ./389ds_exporter:
 ```
 
-* __`--config string`:__  YAML format config file with the extension (i.e. /path/to/config.yaml)
-* __`--debug`:__  Debug logging
-* __`--interval duration`:__  Scrape interval (default 60s)
-* __`--ipa-domain string`:__  FreeIPA domain e.g. example.org
-* __`--ldap.addr string`:__  URI of 389ds server (default "ldap://localhost:389")
-* __`--ldap.cert string`:__  Certificate for LDAP with startTLS or TLS
-* __`--ldap.cert-server-name string`:__  ServerName for LDAP with startTLS or TLS
-* __`--ldap.enablestarttls`:__  Use StartTLS for ldap:// connections
-* __`--ldap.pass string`:__  389ds Directory Manager password
-* __`--ldap.user string`:__  389ds Directory Manager user (default "cn=Directory Manager")
-* __`--log-json`:__  JSON formatted log messages
-* __`--web.listen-address string`:__  Bind address for prometheus HTTP metrics server (default ":9496")
-* __`--web.telemetry-path string`:__  Path to expose metrics on (default "/metrics")
+| CLI flag                  | Environment variable     | Description                                                           |
+|---------------------------|--------------------------|-----------------------------------------------------------------------|
+| `-config`                 | `389DS_CONFIG`            | YAML format config file with the extension (i.e. /path/to/config.yaml) |
+| `--debug`                 | `389DS_DEBUG`                       | Debug logging                                                         |
+| `--interval`              | `389DS_INTERVAL`                    | Scrape interval (default 60s)                                         |
+| `--ipa-domain`            | `389DS_IPA_DOMAIN`                  | FreeIPA domain e.g. example.org                                       |
+| `--ldap.addr`             | `389DS_LDAP_ADDR`                   | URI of 389ds server (default "ldap://localhost:389")                  |
+| `--ldap.cert`             | `389DS_LDAP_CERT`                   | Certificate for LDAP with startTLS or TLS                             |
+| `--ldap.cert-server-name` | `389DS_CERT_SERVER_NAME`            | ServerName for LDAP with startTLS or TLS                              |
+| `--ldap.enablestarttls`   | `389DS_ENABLESTARTTLS`              | Use StartTLS for ldap:// connections                                  |
+| `--ldap.pass`             | `389DS_LDAP_PASS`                   | 389ds Directory Manager password                                      |
+| `--ldap.user`             | `389DS_LDAP_USER`                   | 389ds Directory Manager user (default "cn=Directory Manager")         |
+| `--log-json`              | `389DS_LOG_JSON`                    | JSON formatted log messages                                           |
+| `--web.listen-address`    | `389DS_WEB_LISTEN_ADDRESS`          | Bind address for prometheus HTTP metrics server (default ":9496")     |
+| `--web.telemetry-path`    | `389DS_WEB_TELEMETRY_PATH`          | Path to expose metrics on (default "/metrics")                        |
+
 
 ### Credits
 

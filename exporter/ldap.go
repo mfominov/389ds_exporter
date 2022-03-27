@@ -149,7 +149,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 
 	var errs error
 	// Search for standard accounts
-	log.Debug("getting active accounts")
+	log.Trace("getting active accounts")
 	num, err := ldapCountQuery(l, fmt.Sprintf("cn=users,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -157,7 +157,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	usersGauge.WithLabelValues("active").Set(num)
 
 	// Search for staged accounts
-	log.Debug("getting staged accounts")
+	log.Trace("getting staged accounts")
 	num, err = ldapCountQuery(l, fmt.Sprintf("cn=staged users,cn=accounts,cn=provisioning,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -165,7 +165,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	usersGauge.WithLabelValues("staged").Set(num)
 
 	// Search for deleted accounts
-	log.Debug("getting preserved accounts")
+	log.Trace("getting preserved accounts")
 	num, err = ldapCountQuery(l, fmt.Sprintf("cn=deleted users,cn=accounts,cn=provisioning,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -173,7 +173,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	usersGauge.WithLabelValues("preserved").Set(num)
 
 	// Search for groups
-	log.Debug("getting groups")
+	log.Trace("getting groups")
 	num, err = ldapCountQuery(l, fmt.Sprintf("cn=groups,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -181,7 +181,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	groupsGauge.WithLabelValues().Set(num)
 
 	// Search for hosts
-	log.Debug("getting hosts")
+	log.Trace("getting hosts")
 	num, err = ldapCountQuery(l, fmt.Sprintf("cn=computers,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -189,7 +189,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	hostsGauge.WithLabelValues().Set(num)
 
 	// Search for hostgroups
-	log.Debug("getting hostgroups")
+	log.Trace("getting hostgroups")
 	num, err = ldapCountQuery(l, fmt.Sprintf("cn=hostgroups,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -197,7 +197,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	hostGroupsGauge.WithLabelValues().Set(num)
 
 	// Search for sudo rules
-	log.Debug("getting sudo rules")
+	log.Trace("getting sudo rules")
 	num, err = ldapCountQuery(l, fmt.Sprintf("cn=sudorules,cn=sudo,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -205,7 +205,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	sudoRulesGauge.WithLabelValues().Set(num)
 
 	// Search for hbac rules
-	log.Debug("getting hbac rules")
+	log.Trace("getting hbac rules")
 	num, err = ldapCountQuery(l, fmt.Sprintf("cn=hbac,%s", suffix), "(objectClass=ipahbacrule)", "ipaUniqueID", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -213,7 +213,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	hbacRulesGauge.WithLabelValues().Set(num)
 
 	// Search for dns zones
-	log.Debug("getting dns zones")
+	log.Trace("getting dns zones")
 	num, err = ldapCountQuery(l, fmt.Sprintf("cn=dns,%s", suffix), "(|(objectClass=idnszone)(objectClass=idnsforwardzone))", "idnsName", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -221,7 +221,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	dnsZonesGauge.WithLabelValues().Set(num)
 
 	// Search for ldap conflicts
-	log.Debug("getting ldap conflicts")
+	log.Trace("getting ldap conflicts")
 	num, err = ldapCountQuery(l, suffix, "(nsds5ReplConflict=*)", "nsds5ReplConflict", ldap.ScopeWholeSubtree)
 	if err != nil {
 		errs = multierror.Append(errs, err)
@@ -229,7 +229,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 	ldapConflictsGauge.WithLabelValues().Set(num)
 
 	// Process ldap replication agreements
-	log.Debug("getting replication agreements")
+	log.Trace("getting replication agreements")
 	err = ldapReplicationQuery(l, suffix)
 	if err != nil {
 		errs = multierror.Append(errs, err)

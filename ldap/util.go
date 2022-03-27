@@ -59,17 +59,19 @@ func DialURL(addr string, tlsConf *tls.Config, enableStartTLS bool) (*ldap.Conn,
 		if lurl.Path == "" || lurl.Path == "/" {
 			lurl.Path = "/var/run/slapd/ldapi"
 		}
+		log.Debug("Dialing over Unix socket to ", lurl.Path)
 		return ldap.Dial("unix", lurl.Path)
 	case "ldap":
 		if port == "" {
 			port = ldap.DefaultLdapPort
 		}
+		log.Debug("Dialing unencrypted to ", net.JoinHostPort(host, port))
 		l, err := ldap.Dial("tcp", net.JoinHostPort(host, port))
 		if err != nil {
 			return nil, err
 		}
 		if enableStartTLS {
-			log.Warn("here: ", tlsConf.InsecureSkipVerify)
+			log.Debug("Beginning StartTLS")
 			err = l.StartTLS(tlsConf)
 		}
 		return l, err
@@ -82,6 +84,7 @@ func DialURL(addr string, tlsConf *tls.Config, enableStartTLS bool) (*ldap.Conn,
 				ServerName: host,
 			}
 		}
+		log.Debug("Dialing over TLS to ", net.JoinHostPort(host, port))
 		return ldap.DialTLS("tcp", net.JoinHostPort(host, port), tlsConf)
 	}
 

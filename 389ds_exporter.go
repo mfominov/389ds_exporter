@@ -6,6 +6,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/jessebl/389ds_exporter/exporter"
@@ -34,6 +35,9 @@ func main() {
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
+	viper.SetEnvPrefix("389ds")
+	viper.AutomaticEnv()
 	configFile := viper.GetString("config")
 	if configFile != "" {
 		viper.SetConfigType("yaml")
