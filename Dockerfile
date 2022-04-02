@@ -13,19 +13,17 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o /389ds_exporter
+RUN CGO_ENABLED=0 go build -o /389ds_exporter
 
 ##
 ## Deploy
 ##
-FROM gcr.io/distroless/base-debian10
+FROM golang:alpine
 
 WORKDIR /
 
-COPY --from=build /389ds_exporter  /389ds_exporter
+COPY --from=build /389ds_exporter /389ds_exporter
 
 EXPOSE 9496
-
-USER nonroot:nonroot
 
 ENTRYPOINT ["/389ds_exporter"]
