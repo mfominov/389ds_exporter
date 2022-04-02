@@ -101,8 +101,6 @@ func main() {
 			log.Panic("failed to parse root cert")
 		}
 		tlsConf = &tls.Config{ServerName: ldapCertServerName, RootCAs: roots}
-	} else {
-		tlsConf.InsecureSkipVerify = true
 	}
 
 	log.Info("Starting prometheus HTTP metrics server on ", listenPort)
