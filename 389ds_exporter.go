@@ -38,7 +38,7 @@ func main() {
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
-	viper.SetEnvPrefix("389ds")
+	viper.SetEnvPrefix("ds")
 	viper.AutomaticEnv()
 	configFile := viper.GetString("config")
 	if configFile != "" {

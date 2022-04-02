@@ -1,7 +1,31 @@
-FROM        quay.io/prometheus/busybox:latest
-LABEL maintainer="terrycain"
+# syntax=docker/dockerfile:1
 
-COPY 389ds_exporter /bin/389ds_exporter
+##
+## Build
+##
+FROM golang:1.16-buster AS build
 
-EXPOSE     9496
-ENTRYPOINT [ "/bin/389ds_exporter" ]
+WORKDIR /app
+
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
+
+COPY . ./
+
+RUN go build -o /389ds_exporter
+
+##
+## Deploy
+##
+FROM gcr.io/distroless/base-debian10
+
+WORKDIR /
+
+COPY --from=build /389ds_exporter  /389ds_exporter
+
+EXPOSE 9496
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/389ds_exporter"]
