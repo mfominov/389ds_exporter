@@ -1,21 +1,19 @@
-name: Go
-on: [push]
+name: "CI"
+on: ["push", "pull_request"]
 jobs:
-  build:
-    name: Build
+  ci:
+    name: "Run CI"
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.13
-        uses: actions/setup-go@v1
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Setup go version 1.13
+        uses: actions/setup-go@v3
         with:
           go-version: 1.13
-        id: go
+      - run: go version
 
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
-
-      - name: Get dependencies
-        run: go mod download
-
-      - name: Build
-        run: CGO_ENABLED=0 go build -o ./build/389ds_exporter
+      - uses: dominikh/staticcheck-action@v1.2.0
+        with:
+          version: "2022.1.1"
+          install-go: false
