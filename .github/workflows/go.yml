@@ -32,4 +32,5 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          files: ./build/*
+          fail_on_unmatched_files: true
+          files: .build/*
