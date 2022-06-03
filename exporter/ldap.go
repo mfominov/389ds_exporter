@@ -174,7 +174,7 @@ func scrapeAll(ldapAddr, ldapUser, ldapPass string, tlsConf *tls.Config, enableS
 
 	// Search for groups
 	log.Trace("getting groups")
-	num, err = ldapCountQuery(l, fmt.Sprintf("cn=groups,cn=accounts,%s", suffix), "(objectClass=*)", "objectClass", ldap.ScopeSingleLevel)
+	num, err = ldapCountQuery(l, fmt.Sprintf("cn=groups,cn=accounts,%s", suffix), "(objectClass=ipausergroup)", "objectClass", ldap.ScopeSingleLevel)
 	if err != nil {
 		errs = multierror.Append(errs, err)
 	}
